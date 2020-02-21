@@ -1,0 +1,39 @@
+    } };};
+    int distance=0;
+    Can_Detect(ref_front,distance);   //缶測定用のref_frontの値と,測距離センサによるdistanceの値により缶が検知されるとモータが止まり、Can_Detected=1;となる
+    if(Can_Detected==1 && Count==2){
+    Count+=1;
+    Silver_Detected=0;}
+    if(Silver_Detected==1 && Can_Detected==1 ){
+    Count+=1;}
+    switch(Count){   //カウンタの値に応じて動作を実行していく
+    case 0:
+             average();
+             F_LR_Control(ref1,ref2);//PRの平均値を用いてMDに出力する Forward Left and Right
+             wait();
+             break;
+    case 1:
+             average();
+             F_L_Control(ref1); //Forward left linetrace
+             wait();
+             break;
+    case 2:  
+             average();
+             F_LR_Control(ref1,ref2);//PRの平均値を用いてMDに出力する Forward Left and Right
+             wait();
+             break;
+    case 3:   
+             average();
+             B_LR_Control(ref1,ref2);   // Back Left & Right
+             wait();
+             break; 
+    case 4:
+             average();
+             B_R_Control(ref2); // Backward left linetrace
+             wait();
+             break;}
+     if(Count==5)
+     break;
+   }
+    average(); //PRの値を読み取って平均値を出す
+    //P制御開始
