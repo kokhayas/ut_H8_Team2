@@ -8,3 +8,21 @@ void change_count(){//カウンタを更新する関数
   if(count == 9) count = 1;
 }
 
+void main(){
+  switch(count){
+    case 1:
+      linetrace(1,1,1);//前進、両側
+    case 2:
+      linetrace(0,0,1);//後進、右側
+    case 3:
+      linetrace(0,0,1);//後進、右側
+    case 4:
+      linetrace(1,1,0);//前進、左側
+    case 5:
+      
+    case 6:
+    case 7:
+      linetrace(0,1,0);//後進、左側
+    case 8:
+      linetrace(1,0,1);//前進、右側
+}
