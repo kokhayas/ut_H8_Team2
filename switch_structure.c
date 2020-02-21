@@ -29,6 +29,7 @@ void main(){
   
   switch(mode){
     case 1:
+      linetrace_init();
       linetrace(1,1,1);//前進、両側
     case 2:
       motor_brake();//ブレーキ//motor_stopでもいいかも
