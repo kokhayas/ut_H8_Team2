@@ -43,7 +43,10 @@ void main(){
     case 4:
       linetrace(1,1,0);//前進、左側
     case 5:
-      
+      if(can_status == 2){
+        linetrace(1,0,1);
+      }else if(can_status == 1){
+        
     case 6:
     case 7:
       linetrace(0,1,0);//後進、左側
