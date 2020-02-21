@@ -83,6 +83,13 @@ void motor_stop(void){
     PA.DR.BIT.B6=0;
     PB.DR.BIT.B2=0;
 }
+
+void motor_brake(){//ブレーキをかける関数
+    PA.DR.BIT.B2=1;  
+    PA.DR.BIT.B4=1;
+    PA.DR.BIT.B6=1;
+    PB.DR.BIT.B2=1;
+} 
 void Pcontrl(int a0,int a1,int a2,int pr1,int pr2,int *stop){  
     int dutycntrl1;
     int dutycntrl2;
