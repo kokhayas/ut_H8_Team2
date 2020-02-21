@@ -18,19 +18,21 @@ void quater_msecwait(){
  int t =17;
  while(t--);
  }
-void Read_Pr(int *p,int *q){
-  int i; long sum1; long sum2; 
+void Read_Pr(int *p,int *q,int*r){
+  int i; long sum1; long sum2; long sum3;
   for ( i=0; i < 100; i++){
     AD.ADCSR.BIT.ADF=0;  // フラグクリア
     AD.ADCSR.BIT.ADST = 1;          //変換スタート
     while(AD.ADCSR.BIT.ADF ==0);     //変換が終わるまで待つ
     sum1 += AD.ADDRA >> 6;
     sum2 += AD.ADDRB >> 6;     //6bit右にずらしてsumに格納
+    sum3 += AD.ADDRC >> 6;
     AD.ADCSR.BIT.ADF = 0;    //フラグクリア
     quater_msecwait();       //1msec wait  
   }
   *p=sum1/100;  //pr1=sum1/100;と同じ
   *q=sum2/100;  //pr2=sum2/100;と同じ
+  *r=sum3/100;
 }
 void wait(void){
   long t=500000;
@@ -65,13 +67,13 @@ void adinit(){
   AD.ADCSR.BIT.CKS = 1;
   AD.ADCSR.BIT.CH = 1;//P7-0,P7-1ピン利用 CN2 12pin & CN2 13pin //PR
 }
-void linetraceinit(){
+void linetraceinit(void){
   ioinit();
   ituinit();
   adinit();
 }
 //制御用関数------------------------------
-void motor_start(a0){
+void motor_start(int a0){
     PA.DR.BIT.B2=a0;  
     PA.DR.BIT.B4=~a0;
     PA.DR.BIT.B6=a0;
@@ -84,7 +86,7 @@ void motor_stop(void){
     PB.DR.BIT.B2=0;
 }
 
-void motor_brake(){//ブレーキをかける関数
+void motor_brake(void){//ブレーキをかける関数
     PA.DR.BIT.B2=1;  
     PA.DR.BIT.B4=1;
     PA.DR.BIT.B6=1;
