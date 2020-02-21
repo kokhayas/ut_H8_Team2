@@ -12,7 +12,7 @@
 #define Duty_width  (20)         //Duty比振れ幅(%)
 #define Target_ref  (986)       //目標PR値
 //-------------------------------------
-#define STOP (1000)
+#define STOP (1006)
 //--------------------------------------
 void quater_msecwait(){
  int t =17;
@@ -111,18 +111,18 @@ void Pcontrl(int a0,int a1,int a2,int pr1,int pr2,int *stop){
     dutycntrl2=(Target_ref - pr2)*Kp;//duty制御量の算出
     if(dutycntrl2>Duty_width){
       dutycntrl2=Duty_width;
-    }
+    } ////Kp=4;  Target_ref=986; Duty_base=70; Duty_width=20; STOP=1006
     else if(dutycntrl2<-Duty_width){
       dutycntrl2=-Duty_width;
     }
     motor_start();
     if(a0==1){
-      ITU0.GRB=100*(Duty_base - dutycntrl1*a1 + dutycntrl2*a2);
-      ITU2.GRB=100*(Duty_base - dutycntrl2*a2 + dutycntrl1*a1);
+      ITU0.GRB=100*(Duty_base + dutycntrl1*a1 - dutycntrl2*a2);
+      ITU2.GRB=100*(Duty_base + dutycntrl2*a2 - dutycntrl1*a1);
     }   //前進します
     else if(a0==0){
-      ITU1.GRB=100*(Duty_base - dutycntrl1*a1);
-      ITU3.GRB=100*(Duty_base - dutycntrl2*a2);
+      ITU1.GRB=100*(Duty_base + dutycntrl1*a1 - dutycntrl*a2);
+      ITU3.GRB=100*(Duty_base + dutycntrl2*a2 - dutycntrl*a1);
     }  //後進します
     SCI1_PRINTF("%dITU0.GRB\n",ITU0.GRB);
     SCI1_PRINTF("%dITU1.GRB\n",ITU1.GRB);
