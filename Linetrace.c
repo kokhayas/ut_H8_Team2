@@ -12,7 +12,8 @@
 #define Duty_width  (20)         //Duty比振れ幅(%)
 #define Target_ref  (986)       //目標PR値
 //-------------------------------------
-#define STOP (1006)
+#define D_Stop (5)
+#define Pr_Stop (1006)
 //--------------------------------------
 void quater_msecwait(){
  int t =17;
@@ -97,11 +98,14 @@ void Pcontrl(int a0,int a1,int a2,int pr1,int pr2,int *stop){
     int dutycntrl2;
     //モーター1に対して制御
     //ifで分岐。銀テープが来たらモーターの回転を止める
-    if(pr1>STOP || pr2>STOP){
+    if(pr1>Pr_Stop || pr2>Pr_Stop){
       motor_stop();
-      *stop=1;
-      SCI1_PRINTF("STOP\n");
+      *stop=1; SCI1_PRINTF("Stop=%d\n",*stop);
     }
+    if(distance>D_Stop){
+      *stop=2; SCI_PRINTF("Stop=%d\n",*stop);
+    }
+       
     else
       dutycntrl1=(Target_ref - pr1)*Kp;//duty制御量の算出
       if(dutycntrl1>Duty_width){
@@ -136,10 +140,12 @@ void Pcontrl(int a0,int a1,int a2,int pr1,int pr2,int *stop){
     ITU.TSTR.BIT.STR3 = 1;  // PWM信号出力開始
     SCI1_PRINTF("OK\n");
     }
+int Can_detect;
 void linetrace(int a0,int a1,int a2){
   while(1){                           SCI1_PRINTF("LINE147\n");
-    int pr1; int pr2; int pr3; int Stop=0;
+    int pr1; int pr2; int pr3; int Stop=0;  
     Read_Pr(&pr1,&pr2,&Pr3); 
+    Decide(pr1,pr2,pr3);
     Pcontrl(a0,a1,a2,pr1,pr2,&Stop);       SCI1_PRINTF("Line150\n"); //a0=1;前進、a0=0;後進、a1=1;pr1で制御、 a2=1;pr2で制御、0の時はprを無視して平均速度  
     wait();  
     if(Stop==1)
