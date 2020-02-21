@@ -8,29 +8,14 @@ void change_1to2(){//モードを更新する関数 // 初めに一回使うだ�
   if(mode == 1 && ultrasonic_sensor() < can_distance) mode++;//カウンタが1の時に缶を検知するとインクリメント
   if(pr1 > STOP || pr2 > STOP) mode++;//銀テープを検知するとカウンタをインクリメント
   if(mode == 9) mode = 1;
+}100;
 }
-void Read_Pr(int *p,int *q,int *r){
-  int i; long sum1; long sum2; long sum3; 
-  for ( i=0; i < 100; i++){
-    AD.ADCSR.BIT.ADF=0;  // フラグクリア
-    AD.ADCSR.BIT.ADST = 1;          //変換スタート
-    while(AD.ADCSR.BIT.ADF ==0);     //変換が終わるまで待つ
-    sum1 += AD.ADDRA >> 6;
-    sum2 += AD.ADDRB >> 6;     //6bit右にずらしてsumに格納
-    sum3 += AD.ADDRC >> 6;
-    AD.ADCSR.BIT.ADF = 0;    //フラグクリア
-    quater_msecwait();       //1msec wait  
-  }
-  *p=sum1/100;  //pr1=sum1/100;と同じ
-  *q=sum2/100;  //pr2=sum2/100;と同じ
-  *r=sum3/100;
-}
+//////////ライントレースのライブラリ始め//////////////////
+////////ライントレースのライブラリ終わり/////////////////////////
+
 void main(){
-  int pr1; int pr2; int pr3;
-  Read_Pr(&pr1,&pr2,&pr3);
-  
-  change_mode();
-  
+  linetraceinit();
+  linetrace(1,1,1);
     switch(mode){
     case 1:
       linetrace_init();
