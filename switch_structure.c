@@ -5,7 +5,7 @@ int mode = 0;//モードを示す変数
 int can_status = 0;//0:缶なし1:黒い缶あり2:銀色の缶あり
 
 void change_mode(){//モードを更新する関数
-  if(mode == 1 && ultrasonic_sensor() < can_distance) mode++;カウンタが1の時に缶を検知するとインクリメント
+  if(mode == 1 && ultrasonic_sensor() < can_distance) mode++;//カウンタが1の時に缶を検知するとインクリメント
   if(pr1 > STOP || pr2 > STOP) mode++;//銀テープを検知するとカウンタをインクリメント
   if(mode == 9) mode = 1;
 }
