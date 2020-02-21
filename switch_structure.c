@@ -6,11 +6,20 @@ int mode =0;//モードを示す変数
 void change_mode(){//モードを更新する関数
   if(mode == 1 && ultrasonic_sensor() < can_distance) mode++;カウンタが1の時に缶を検知するとインクリメント
   if(pr1 > STOP || pr2 > STOP) mode++;//銀テープを検知するとカウンタをインクリメント
-  if(count == 9) mode = 1;
+  if(mode == 9) mode = 1;
 }
 
-int Read_canPR(){
-
+long Read_canPR(){//缶を判定するPRの値を読み取る関数
+  long sum = 0;
+  for (i=0; i<10; i++){//10回の平均をとる
+    AD.ADCSR.BIT.ADF = 0;// フラグクリア
+    AD.ADCSR.BIT.ADST = 1;//変換スタート
+    while(AD.ADCSR.BIT.ADF == 0);//変換が終わるまで待つ
+    sum += AD.ADDRC >> 6;//6bit右にずらしてsumに格納
+    AD.ADCSR.BIT.ADF = 0;//フラグクリア
+    quater_msecwait(); 
+  }
+  return sum/10;//読み取った値を返す
 }
 
 void main(){
