@@ -97,7 +97,7 @@ void Pcontrl(int a0,int a1,int a2,int pr1,int pr2,int *stop){
     int dutycntrl2;
     //モーター1に対して制御
     //ifで分岐。銀テープが来たらモーターの回転を止める
-    if(pr1>STOP && pr2>STOP){
+    if(pr1>STOP || pr2>STOP){
       motor_stop();
       *stop=1;
       SCI1_PRINTF("STOP\n");
@@ -138,8 +138,8 @@ void Pcontrl(int a0,int a1,int a2,int pr1,int pr2,int *stop){
     }
 void linetrace(int a0,int a1,int a2){
   while(1){                           SCI1_PRINTF("LINE147\n");
-    int pr1; int pr2;int Stop=0;
-    Read_Pr(&pr1,&pr2);//
+    int pr1; int pr2; int pr3; int Stop=0;
+    Read_Pr(&pr1,&pr2,&Pr3); 
     Pcontrl(a0,a1,a2,pr1,pr2,&Stop);       SCI1_PRINTF("Line150\n"); //a0=1;前進、a0=0;後進、a1=1;pr1で制御、 a2=1;pr2で制御、0の時はprを無視して平均速度  
     wait();  
     if(Stop==1)
