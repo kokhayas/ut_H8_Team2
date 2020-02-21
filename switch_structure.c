@@ -9,6 +9,9 @@ void change_count(){//カウンタを更新する関数
 }
 
 void main(){
+  
+  change_count();
+  
   switch(count){
     case 1:
       linetrace(1,1,1);//前進、両側
@@ -25,4 +28,5 @@ void main(){
       linetrace(0,1,0);//後進、左側
     case 8:
       linetrace(1,0,1);//前進、右側
+     
 }
