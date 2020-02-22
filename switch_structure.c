@@ -1,5 +1,3 @@
-int mode= 0;//モードを示す変数
-//int color = 0;//0:缶なし0:黒い缶あり-1:銀色の缶あり1:
 #include <3052.h>
 #define RX_BUFFER_SIZE 256
 #define TX_BUFFER_SIZE 256
@@ -201,18 +199,18 @@ long readD1(){
     return distance;
 }
 /////////////////////距離測定センサのライブラリ終了///////////////////////////
-void detectSilver(int pr1,int pr2,int *s){
+void detectSilver(int pr1,int pr2,int sflag){
     if (pr1>1006 || pr2>1006){
-      *s=1;}
+      sflag=1;}
     else{
-      *s=0;
+      sflag=0;
    }
 }
-void detectDistance(long d1,int *d){
+void detectDistance(long d1,int dflag){
     if (d1 < 5){
-      *d=1;}
+      dflag=1;}
     else {
-      *d=0;
+      dflag=0;
    }
 } 
 void decidePr3(int pr3,int color){
@@ -251,29 +249,95 @@ int main(void){  //初期設定、変数の定義、変数に値を代入、関�
   wait();
   return 0;
 };
+
+int mode= 0;//モードを示す変数  グローバル変数
+int color = 0;//0:缶なし0:黒い缶あり-1:銀色の缶あり1:　グローバル変数
 void main(){
- 
+    //switch検知
+ 　　mode=1;
     switch(mode){
-    case 1:
-      linetrace_init();
-      linetrace(1,1,1);//前進、両側
+    case 1: 
+      int dflag=0;
+      while(dflag==0){
+        adinit_CH1();
+        int pr1;int pr2;  
+        pr1=readPr1(); pr2=readPr2();//0~1023;
+        ultrasonicinit();
+        long  d1; 
+        d1=readD1(); //cm //int sflag=0; detectSilver(pr1,pr2,&sflag)// if (sflag=1){};
+        detectDistance(d1,dflag);   //缶を検知したらdflagを立てる
+        if(dflag==1){        // dflag==1;のとき缶の色を検知しcolorに代入
+          int pr3; pr3=readPr3();
+          decidePr3(pr3,color);
+        }
+       ioinit_MD();
+       ituinit_ITU();
+       Pcontrl(1,1,1,pr1,pr2);   //直進、両方のPrを用いたライントレース(a0,a1,a2,pr1,pr2)
+       wait();    //この時間だけライントレースをする
+      }
+      mode=2; //缶を見つけたらwhile文を抜けてmode2へ移行
+    break;
     case 2:
-      motor_brake();//ブレーキ//motor_stopでもいいかも
-      if(Read_canPR() > can_pr){//缶の色を判定
-        can_status = 2;//銀
-      }else{
-        can_status = 1;//黒
-      }  
-      linetrace(0,0,1);//後進、右側
+      int sflag=0;
+      while(sflag==1){
+        adinit_CH1();
+        int pr1;int pr2;  
+        pr1=readPr1(); pr2=readPr2();//0~1023;
+        detectSilver(pr1,pr2,sflag); //もし銀テープをどちらかのPrで検知したらsflag=1;にする
+        ioinit_MD();
+        ituinit_ITU();
+        Pcontrl(0,0,1,pr1,pr2);   //後進、Pr2を用いたライントレース(a0,a1,a2,pr1,pr2)
+        wait();    //この時間だけライントレースをする
+      }
+      mode=3; //銀テープを見つけたらwhile文を抜けてmode3へ移行
     case 3:
-      linetrace(0,0,1);//後進、右側
+       int sflag=0;
+       while(sflag==1){
+         adinit_CH1();
+         int pr1;int pr2;  
+         pr1=readPr1(); pr2=readPr2();//0~1023;
+         detectSilver(pr1,pr2,sflag); //もし銀テープをどちらかのPrで検知したらsflag=1;にする
+         ioinit_MD();
+         ituinit_ITU();
+         Pcontrl(1,1,0,pr1,pr2);   //直進、Pr1を用いたライントレース(a0,a1,a2,pr1,pr2)
+         wait();    //この時間だけライントレースをする
+      }
+      mode=4; //銀テープを見つけたらwhile文を抜けてmode4へ移行
     case 4:
-      linetrace(1,1,0);//前進、左側
+      int sflag=0;
+       while(sflag==0){
+         adinit_CH1();
+         int pr1;int pr2;  
+         pr1=readPr1(); pr2=readPr2();//0~1023;
+         detectSilver(pr1,pr2,sflag); //もし銀テープをどちらかのPrで検知したらsflag=1;にする
+         ioinit_MD();
+         ituinit_ITU();
+         if(color==1){ //銀色の缶を持っている場合
+         Pcontrl(1,1,0,pr1,pr2);   //直進、Pr1を用いたライントレース(a0,a1,a2,pr1,pr2)
+         wait();    //この時間だけライントレースをする
+         }
+         else if(color==-1){
+         Pcontrl(1,0,1,pr1,pr2);   //直進、pr2を用いたライントレース
+         wait();
+         }
+       }
+       mode = 5;   //缶捨て場に到着したらmode5へ移行
+      
     case 5:
-      if(can_status == 2){
-        linetrace(1,0,1);
-      }else if(can_status == 1){
-        
+  int dflag=1;   //缶を落とすまで前後に少し移動する
+      while(dflag==1){
+        adinit_CH1();
+        int pr1;int pr2;  
+        pr1=readPr1(); pr2=readPr2();//0~1023;
+        ultrasonicinit();
+        long  d1; 
+        d1=readD1(); //cm //int sflag=0; detectSilver(pr1,pr2,&sflag)// if (sflag=1){};
+        detectDistance(d1,dflag);   //缶を検知したらdflagを立て
+        ioinit_MD();
+        ituinit_ITU();
+        Pcontrl(1,1,1,pr1,pr2);   //直進、両方のPrを用いたライントレース(a0,a1,a2,pr1,pr2)
+        wait();    //この時間だけライントレースをする
+       }
     case 6:
     case 7:
       linetrace(0,1,0);//後進、左側
