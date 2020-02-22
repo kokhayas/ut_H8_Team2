@@ -254,9 +254,10 @@ int mode= 0;//モードを示す変数  グローバル変数
 int color = 0;//0:缶なし0:黒い缶あり-1:銀色の缶あり1:　グローバル変数
 void main(){
     //switch検知
- 　　mode=1;
+ 　　mode=1
     switch(mode){
     case 1: 
+      color=0; //初期化
       int dflag=0;
       while(dflag==0){
         adinit_CH1();
@@ -277,7 +278,20 @@ void main(){
       }
       mode=2; //缶を見つけたらwhile文を抜けてmode2へ移行
     break;
-    case 2:
+     case 2:
+       int sflag=0;
+      while(sflag==1){
+        adinit_CH1();
+        int pr1;int pr2;  
+        pr1=readPr1(); pr2=readPr2();//0~1023;
+        detectSilver(pr1,pr2,sflag); //もし銀テープをどちらかのPrで検知したらsflag=1;にする
+        ioinit_MD();
+        ituinit_ITU();
+        Pcontrl(0,1,1,pr1,pr2);   //後進、Pr2を用いたライントレース(a0,a1,a2,pr1,pr2)
+        wait();    //この時間だけライントレースをする
+      }
+      mode=3; //銀テープを見つけたらwhile文を抜けてmode3へ移行
+    case 3:
       int sflag=0;
       while(sflag==1){
         adinit_CH1();
@@ -289,8 +303,8 @@ void main(){
         Pcontrl(0,0,1,pr1,pr2);   //後進、Pr2を用いたライントレース(a0,a1,a2,pr1,pr2)
         wait();    //この時間だけライントレースをする
       }
-      mode=3; //銀テープを見つけたらwhile文を抜けてmode3へ移行
-    case 3:
+      mode=4; //銀テープを見つけたらwhile文を抜けてmode3へ移行
+    case 4:
        int sflag=0;
        while(sflag==1){
          adinit_CH1();
@@ -302,8 +316,8 @@ void main(){
          Pcontrl(1,1,0,pr1,pr2);   //直進、Pr1を用いたライントレース(a0,a1,a2,pr1,pr2)
          wait();    //この時間だけライントレースをする
       }
-      mode=4; //銀テープを見つけたらwhile文を抜けてmode4へ移行
-    case 4:
+      mode=5; //銀テープを見つけたらwhile文を抜けてmode4へ移行
+    case 5:
       int sflag=0;
        while(sflag==0){
          adinit_CH1();
@@ -321,10 +335,10 @@ void main(){
          wait();
          }
        }
-       mode = 5;   //缶捨て場に到着したらmode5へ移行
+       mode = 6;   //缶捨て場に到着したらmode5へ移行
       
-    case 5:
-  int dflag=1;   //缶を落とすまで前後に少し移動する
+    case 6:
+  int dflag=1;   //缶を落とすまで前後に少し移動する予定
       while(dflag==1){
         adinit_CH1();
         int pr1;int pr2;  
@@ -332,16 +346,62 @@ void main(){
         ultrasonicinit();
         long  d1; 
         d1=readD1(); //cm //int sflag=0; detectSilver(pr1,pr2,&sflag)// if (sflag=1){};
-        detectDistance(d1,dflag);   //缶を検知したらdflagを立て
+        detectDistance(d1,dflag);   //缶を捨てたらdflag=0;
         ioinit_MD();
         ituinit_ITU();
         Pcontrl(1,1,1,pr1,pr2);   //直進、両方のPrを用いたライントレース(a0,a1,a2,pr1,pr2)
         wait();    //この時間だけライントレースをする
        }
-    case 6:
+       mode=7;
     case 7:
-      linetrace(0,1,0);//後進、左側
+        int sflag=0;
+        while(sflag==0){
+          adinit_CH1();
+          int pr1;int pr2;  
+          pr1=readPr1(); pr2=readPr2();//0~1023;
+          detectSilver(pr1,pr2,sflag); //もし銀テープをどちらかのPrで検知したらsflag=1;にする
+          ioinit_MD();
+          ituinit_ITU();
+          if(color==1){ //銀色の缶を持っていた場合
+          Pcontrl(0,1,0,pr1,pr2);   //後進、Pr1を用いたライントレース(a0,a1,a2,pr1,pr2)
+         wait();    //この時間だけライントレースをする
+         }
+         else if(color==-1){
+         Pcontrl(0,0,1,pr1,pr2);   //後進、pr2を用いたライントレース
+         wait();
+         }
+       }
+       mode = 8;//へ移行
     case 8:
-      linetrace(1,0,1);//前進、右側
+      int sflag=0;
+        while(sflag==0){
+          adinit_CH1();
+          int pr1;int pr2;  
+          pr1=readPr1(); pr2=readPr2();//0~1023;
+          detectSilver(pr1,pr2,sflag); //もし銀テープをどちらかのPrで検知したらsflag=1;にする
+          ioinit_MD();
+          ituinit_ITU();
+          Pcontrl(0,1,0,pr1,pr2);   //後進、Pr1を用いたライントレース(a0,a1,a2,pr1,pr2)
+          wait();    //この時間だけライントレースをする
+         }
+       }
+       mode = 9;//へ移行
+     
+    case 9:
+          int sflag=0;
+          while(sflag==0){
+          adinit_CH1();
+          int pr1;int pr2;  
+          pr1=readPr1(); pr2=readPr2();//0~1023;
+          detectSilver(pr1,pr2,sflag); //もし銀テープをどちらかのPrで検知したらsflag=1;にする
+          ioinit_MD();
+          ituinit_ITU();
+          Pcontrl(1,0,1,pr1,pr2);   //後進、Pr1を用いたライントレース(a0,a1,a2,pr1,pr2)
+          wait();    //この時間だけライントレースをする
+         }
+       }
+       mode = 1;//へ移行
+ 
+
      
 }
