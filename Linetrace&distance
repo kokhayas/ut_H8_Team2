@@ -106,11 +106,6 @@ void motor_stop(void){
 void Pcontrl(int a0,int a1,int a2,int pr1,int pr2){  
     int dutycntrl1;
     int dutycntrl2; //モーター1に対して制御 //ifで分岐。銀テープが来たらモーターの回転を止める
- //   if(pr1>STOP || pr2>STOP){
-  //    motor_stop();
- //     *stop=1;
-//      SCI1_PRINTF("STOP\n");
- //   }
      dutycntrl1=(Target_ref - pr1)*Kp;//duty制御量の算出 //理想的には0になるべき値
       if(dutycntrl1>Duty_width){
         dutycntrl1=Duty_width;
@@ -196,7 +191,6 @@ void convertCD(long count,long *d){
   *d /= 1000000; //1秒あたりの距離を算出//countはlong型なので先に100万で割ると0になってしまう
 }
 long readD1(){   
-    ultrasonicinit();
     long count; //タイマーのカウント数を格納する変数
     long distance; //距離を格納する変数
     getCount(&count); //距離を測定
@@ -218,15 +212,23 @@ long readD1(){
    } 
 //main------------------------------------
  int main(void){
-  linetraceinit();
-  int pr1;int pr2; int pr3; long d1;
-  pr1=readPr1; pr2=readPr2; pr3=readPr3; //0~1023;
-  d1=readD1; //cm
+  adinit_CH1();
+  int pr1;int pr2; int pr3; 
+  pr1=readPr1(); pr2=readPr2(); pr3=readPr3(); //0~1023;
+  
+  ultrasonicinit();
+  long d1; 
+  d1=readD1(); //cm
+ 
   int sflag=0; int dflag=0; 
   detectSilver(pr1,pr2,&sflag);
   detectDistance(d1,&dflag);
-  if(dflag==1){
-  linetraceinit();   SCI1_PRINTF("Linetracestartttttttttttttttttttttt\n");// ioinit(); ituinit(); adinit();が含まれている
+ 
+  if(dflag==1)
+   break;
+ 
+  ioinit_MD();
+  ituinit_ITU();
   motor_start(a0);
   Pcontrol(ao,a1,a2,pr1,pr2);
   wait();
