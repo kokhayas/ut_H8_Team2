@@ -222,38 +222,37 @@ void decidePr3(int pr3,int color){
   }
 }
 //main------------------------------------
-int main(void){  //初期設定、変数の定義、変数に値を代入、関数に変数を代入、
-  adinit_CH1();
-  int pr1;int pr2;  
-  pr1=readPr1(); pr2=readPr2();//0~1023;
+ //初期設定、変数の定義、変数に値を代入、関数に変数を代入、
+//adinit_CH1();
+//  int pr1;int pr2;  
+ // pr1=readPr1(); pr2=readPr2();//0~1023;
   
-  ultrasonicinit();
-  long  d1; 
-  d1=readD1(); //cm
+ // ultrasonicinit();
+ // long  d1; 
+  //d1=readD1(); //cm
  
-  int sflag=0; 
-  detectSilver(pr1,pr2,&sflag);
+  //int sflag=0; 
+  //detectSilver(pr1,pr2,&sflag);
  // if (sflag=1){};
     
-  int dflag=0;  
-  detectDistance(d1,&dflag);
-  if(dflag==1){
-    int pr3; pr3=readPr3();
-    void decidePr3(pr3,color);
-  };
+  //int dflag=0;  
+  //detectDistance(d1,&dflag);
+  //if(dflag==1){
+  //  int pr3; pr3=readPr3();
+  //  void decidePr3(pr3,color);
+ // };
 //  if (color=1){}
  // else if(color=-1){}
-  ioinit_MD();
-  ituinit_ITU();
-  Pcontrl(1,1,1,pr1,pr2);
-  wait();
-  return 0;
-};
-
+  //ioinit_MD();
+ // ituinit_ITU();
+ // Pcontrl(1,1,1,pr1,pr2);
+ // wait();
+ // return 0;
+//};
 int mode= 0;//モードを示す変数  グローバル変数
 int color = 0;//0:缶なし0:黒い缶あり-1:銀色の缶あり1:　グローバル変数
-void main(){
-    //switch検知
+int main(){
+    //switch検知やEEPROMの初期設定をする　初期設定が終わったらmode=1;にする
  　　mode=1
     switch(mode){
     case 1: 
@@ -291,6 +290,7 @@ void main(){
         wait();    //この時間だけライントレースをする
       }
       mode=3; //銀テープを見つけたらwhile文を抜けてmode3へ移行
+     break;
     case 3:
       int sflag=0;
       while(sflag==1){
@@ -304,6 +304,7 @@ void main(){
         wait();    //この時間だけライントレースをする
       }
       mode=4; //銀テープを見つけたらwhile文を抜けてmode3へ移行
+      break;4
     case 4:
        int sflag=0;
        while(sflag==1){
@@ -317,6 +318,7 @@ void main(){
          wait();    //この時間だけライントレースをする
       }
       mode=5; //銀テープを見つけたらwhile文を抜けてmode4へ移行
+      break;
     case 5:
       int sflag=0;
        while(sflag==0){
@@ -336,6 +338,7 @@ void main(){
          }
        }
        mode = 6;   //缶捨て場に到着したらmode5へ移行
+      break;
       
     case 6:
   int dflag=1;   //缶を落とすまで前後に少し移動する予定
@@ -353,6 +356,7 @@ void main(){
         wait();    //この時間だけライントレースをする
        }
        mode=7;
+      break;
     case 7:
         int sflag=0;
         while(sflag==0){
@@ -372,6 +376,7 @@ void main(){
          }
        }
        mode = 8;//へ移行
+      break;
     case 8:
       int sflag=0;
         while(sflag==0){
@@ -386,6 +391,7 @@ void main(){
          }
        }
        mode = 9;//へ移行
+ break;
      
     case 9:
           int sflag=0;
@@ -401,6 +407,7 @@ void main(){
          }
        }
        mode = 1;//へ移行
+break;
  
 
      
