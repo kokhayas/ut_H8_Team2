@@ -419,7 +419,9 @@ int main(){
          
      case 10:
          //LEDを点灯させてゴール break無し
-     
+        
+         break;
+    }
 }
-}
- return 0;};
+ return 0;
+};
