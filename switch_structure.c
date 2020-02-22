@@ -198,7 +198,7 @@ long readD1(){
     convertCD(count,&distance); //カウンタの値を距離に変換 SCI1_PRINTF("%ldcm\n", distance); //distanceに必要な値が格納された
     return distance;
 }
-/////////////////////距離測定センサのライブラリ終了///////////////////////////
+/////////////////////距離測定センサ//////////////////////////
 void detectSilver(int pr1,int pr2,int sflag){
     if (pr1>1006 || pr2>1006){
       sflag=1;}
@@ -250,35 +250,45 @@ void decidePr3(int pr3,int color){
  // return 0;
 //};
 int mode= 0;//モードを示す変数  グローバル変数
-int color = 0;//0:缶なし0:黒い缶あり-1:銀色の缶あり1:　グローバル変数
+int color = 0;//0:缶なし0:黒い缶あり-1:銀色の缶あり1:グローバル変数
+int sflag=0; int dflag=0;
 int main(){
-    //switch検知やEEPROMの初期設定をする　初期設定が終わったらmode=1;にする
- 　　mode=1
+    //switch検知やEEPROMの初期設定をする初期設定が終わったらmode=1;にする
+    mode=1;
+    while(1){
     switch(mode){
     case 1: 
       color=0; //初期化
-      int dflag=0;
-      while(dflag==0){
+      dflag=0;
+      sflag=0;
+      while(dflag==0&&sflag==0){
         adinit_CH1();
         int pr1;int pr2;  
         pr1=readPr1(); pr2=readPr2();//0~1023;
+        detectSilver(pr1,pr2,sflag);// 銀テープを検知したらsflagを立てる
+        
         ultrasonicinit();
         long  d1; 
-        d1=readD1(); //cm //int sflag=0; detectSilver(pr1,pr2,&sflag)// if (sflag=1){};
+        d1=readD1(); //cm //int sflag=0; 
         detectDistance(d1,dflag);   //缶を検知したらdflagを立てる
         if(dflag==1){        // dflag==1;のとき缶の色を検知しcolorに代入
           int pr3; pr3=readPr3();
           decidePr3(pr3,color);
         }
-       ioinit_MD();
-       ituinit_ITU();
-       Pcontrl(1,1,1,pr1,pr2);   //直進、両方のPrを用いたライントレース(a0,a1,a2,pr1,pr2)
-       wait();    //この時間だけライントレースをする
+        ioinit_MD();
+        ituinit_ITU();
+        Pcontrl(1,1,1,pr1,pr2);   //直進、両方のPrを用いたライントレース(a0,a1,a2,pr1,pr2)
+        wait();    //この時間だけライントレースをする
       }
+      if(dflag==1){
       mode=2; //缶を見つけたらwhile文を抜けてmode2へ移行
+      }
+      else if(sflag==1){
+      mode=10;}
+      
     break;
      case 2:
-       int sflag=0;
+      sflag=0;
       while(sflag==1){
         adinit_CH1();
         int pr1;int pr2;  
@@ -292,7 +302,7 @@ int main(){
       mode=3; //銀テープを見つけたらwhile文を抜けてmode3へ移行
      break;
     case 3:
-      int sflag=0;
+      sflag=0;
       while(sflag==1){
         adinit_CH1();
         int pr1;int pr2;  
@@ -304,9 +314,9 @@ int main(){
         wait();    //この時間だけライントレースをする
       }
       mode=4; //銀テープを見つけたらwhile文を抜けてmode3へ移行
-      break;4
+      break;
     case 4:
-       int sflag=0;
+       sflag=0;
        while(sflag==1){
          adinit_CH1();
          int pr1;int pr2;  
@@ -320,7 +330,7 @@ int main(){
       mode=5; //銀テープを見つけたらwhile文を抜けてmode4へ移行
       break;
     case 5:
-      int sflag=0;
+       sflag=0;
        while(sflag==0){
          adinit_CH1();
          int pr1;int pr2;  
@@ -341,7 +351,7 @@ int main(){
       break;
       
     case 6:
-  int dflag=1;   //缶を落とすまで前後に少し移動する予定
+      dflag=1;   //缶を落とすまで前後に少し移動する予定
       while(dflag==1){
         adinit_CH1();
         int pr1;int pr2;  
@@ -358,7 +368,7 @@ int main(){
        mode=7;
       break;
     case 7:
-        int sflag=0;
+        sflag=0;
         while(sflag==0){
           adinit_CH1();
           int pr1;int pr2;  
@@ -378,7 +388,7 @@ int main(){
        mode = 8;//へ移行
       break;
     case 8:
-      int sflag=0;
+        sflag=0;
         while(sflag==0){
           adinit_CH1();
           int pr1;int pr2;  
@@ -389,12 +399,11 @@ int main(){
           Pcontrl(0,1,0,pr1,pr2);   //後進、Pr1を用いたライントレース(a0,a1,a2,pr1,pr2)
           wait();    //この時間だけライントレースをする
          }
-       }
        mode = 9;//へ移行
- break;
+       break;
      
     case 9:
-          int sflag=0;
+          sflag=0;
           while(sflag==0){
           adinit_CH1();
           int pr1;int pr2;  
@@ -405,10 +414,12 @@ int main(){
           Pcontrl(1,0,1,pr1,pr2);   //後進、Pr1を用いたライントレース(a0,a1,a2,pr1,pr2)
           wait();    //この時間だけライントレースをする
          }
-       }
-       mode = 1;//へ移行
-break;
- 
-
+         mode = 1;//へ移行
+         break;
+         
+     case 10:
+         //LEDを点灯させてゴール break無し
      
 }
+}
+ return 0;};
